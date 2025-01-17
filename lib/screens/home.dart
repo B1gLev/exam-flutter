@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:test_app/screens/accounts/username.dart';
+import 'package:test_app/screens/accounts/username_page.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});
@@ -15,9 +15,8 @@ class Home extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        systemOverlayStyle: const SystemUiOverlayStyle(
-          statusBarBrightness: Brightness.dark
-        ),
+        systemOverlayStyle:
+            const SystemUiOverlayStyle(statusBarBrightness: Brightness.dark),
       ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(40, 1.2 * kToolbarHeight, 40, 20),
@@ -31,9 +30,7 @@ class Home extends StatelessWidget {
                   height: 276,
                   width: 263,
                   decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.deepPurple
-                  ),
+                      shape: BoxShape.circle, color: Colors.deepPurple),
                 ),
               ),
               Align(
@@ -42,9 +39,7 @@ class Home extends StatelessWidget {
                   height: 276,
                   width: 263,
                   decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.deepPurple
-                  ),
+                      shape: BoxShape.circle, color: Colors.deepPurple),
                 ),
               ),
               Align(
@@ -52,9 +47,7 @@ class Home extends StatelessWidget {
                 child: Container(
                   height: 265,
                   width: 324,
-                  decoration: const BoxDecoration(
-                      color: Color(0xFFEC7D0F)
-                  ),
+                  decoration: const BoxDecoration(color: Color(0xFFEC7D0F)),
                 ),
               ),
               BackdropFilter(
@@ -69,9 +62,7 @@ class Home extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Center(
-                        child: Image.asset(
-                          "assets/logo.png"
-                        ),
+                        child: Image.asset("assets/logo.png"),
                       ),
                     ),
                     const Expanded(
@@ -90,8 +81,8 @@ class Home extends StatelessWidget {
                           SizedBox(height: 10),
                           Text(
                             "Egyszerű csatlakozás a Sun GYM-be:"
-                                "\nFedezd fel, hogyan érheted el fitnesz"
-                                "\ncéljaidat gyorsan és könnyedén!",
+                            "\nFedezd fel, hogyan érheted el fitnesz"
+                            "\ncéljaidat gyorsan és könnyedén!",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 14,
@@ -115,20 +106,19 @@ class Home extends StatelessWidget {
                               OutlinedButton(
                                 onPressed: () {},
                                 style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                                  foregroundColor: Colors.white,
-                                  side: const BorderSide(
-                                    color: Color(0xFF6A432A),
-                                    width: 1,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15)
-                                  )
-                                ),
-                                child: Text("Belépés".toUpperCase(),
-                                  style: const TextStyle(
-                                    fontSize: 16
-                                  ),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 10, horizontal: 15),
+                                    foregroundColor: Colors.white,
+                                    side: const BorderSide(
+                                      color: Color(0xFF6A432A),
+                                      width: 1,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(15))),
+                                child: Text(
+                                  "Belépés".toUpperCase(),
+                                  style: const TextStyle(fontSize: 16),
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -137,27 +127,28 @@ class Home extends StatelessWidget {
                                 child: ElevatedButton(
                                   onPressed: () {
                                     Navigator.pushReplacement(
-                                        context,
+                                      context,
                                       PageRouteBuilder(
                                         opaque: false,
-                                        pageBuilder: (context, animation, secondaryAnimation) => const Scaffold(
+                                        pageBuilder: (context, animation,
+                                                secondaryAnimation) =>
+                                            const Scaffold(
                                           backgroundColor: Colors.transparent,
-                                          body: Username(),
+                                          body: UsernamePage(),
                                         ),
                                       ),
                                     );
                                   },
                                   style: OutlinedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 10, horizontal: 15),
                                       foregroundColor: Colors.black,
                                       shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(15)
-                                      )
-                                  ),
-                                  child: Text("Fiók létrehozása".toUpperCase(),
-                                    style: const TextStyle(
-                                        fontSize: 16
-                                    ),
+                                          borderRadius:
+                                              BorderRadius.circular(15))),
+                                  child: Text(
+                                    "Fiók létrehozása".toUpperCase(),
+                                    style: const TextStyle(fontSize: 16),
                                   ),
                                 ),
                               )
