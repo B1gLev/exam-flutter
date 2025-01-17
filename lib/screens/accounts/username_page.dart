@@ -3,11 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:test_app/blocs/registration/registration_bloc.dart';
 import 'package:test_app/blocs/registration/registration_event.dart';
 import 'package:test_app/screens/accounts/email_page.dart';
+import 'package:test_app/style/strings.dart';
 import 'package:test_app/style/text_input_field.dart';
 import 'package:test_app/widgets/app_bar.dart';
 import 'package:test_app/widgets/background_decoration.dart';
-
-import '../../style/strings.dart';
 
 class UsernamePage extends StatelessWidget {
   const UsernamePage({super.key});
