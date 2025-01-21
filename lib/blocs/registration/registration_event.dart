@@ -32,13 +32,4 @@ class UpdateEmail extends RegistrationEvent {
   List<Object?> get props => [email];
 }
 
-class UpdatePassword extends RegistrationEvent {
-  final String password;
-
-  UpdatePassword(this.password);
-
-  @override
-  List<Object?> get props => [password];
-}
-
 class RegistrationSubmitted extends RegistrationEvent {}

@@ -1,12 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:test_app/blocs/registration/registration_bloc.dart';
-import 'package:test_app/blocs/registration/registration_event.dart';
+import 'package:test_app/blocs/registration/registration_state.dart';
 import 'package:test_app/screens/main_page.dart';
 import 'package:test_app/style/password_input_field.dart';
 import 'package:test_app/style/strings.dart';
 import 'package:test_app/widgets/app_bar.dart';
 import 'package:test_app/widgets/background_decoration.dart';
+import 'package:http/http.dart' as http;
 
 class PasswordPage extends StatelessWidget {
   const PasswordPage({super.key});
@@ -33,6 +37,29 @@ class PasswordPageState extends State<PasswordPageContent>  {
     setState(() {
       _isButtonVisible = _formKey.currentState!.validate();
     });
+  }
+
+  Future<String> createUser(String firstName, String lastName, String email, String password) async {
+    var url = Uri.http('localhost:3000', 'auth/register');
+    var response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: jsonEncode({
+          "firstName": firstName,
+          "lastName": lastName,
+          "email": email,
+          "password": password,
+        })
+    );
+
+    if (response.statusCode == 409) return "Error";
+    final json = jsonDecode(response.body);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("accessToken", json["accessToken"]);
+    prefs.setString("refreshToken", json["refreshToken"]);
+    return "Success";
   }
 
   @override
@@ -103,22 +130,31 @@ class PasswordPageState extends State<PasswordPageContent>  {
                                     borderRadius: BorderRadius.circular(15),
                                   ),
                                 ),
-                                onPressed: () {
+                                onPressed: () async {
                                   final bloc = BlocProvider.of<RegistrationBloc>(
                                       context,
                                       listen: false
                                   );
-                                  bloc.add(UpdatePassword(passwordController.text));
-
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => BlocProvider.value(
-                                        value: bloc,
-                                        child: const Test(),
+                                  final currentState = bloc.state;
+                                  if (currentState is RegistrationValid) {
+                                    final result = await createUser(
+                                        currentState.firstName,
+                                        currentState.lastName,
+                                        currentState.email,
+                                       passwordController.text
+                                    );
+                                    if (result == "Success") {
+                                      Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => BlocProvider.value(
+                                          value: bloc,
+                                          child: const Test(),
+                                        ),
                                       ),
-                                    ),
-                                  );
+                                    );
+                                    }
+                                  }
                                 },
                                 child: const Text(
                                   AccountStrings.buttonNextText,

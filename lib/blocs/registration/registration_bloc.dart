@@ -9,8 +9,6 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState> {
     on<UpdateLastName>(
         (event, emit) => _updateState(emit, lastName: event.lastName));
     on<UpdateEmail>((event, emit) => _updateState(emit, email: event.email));
-    on<UpdatePassword>(
-        (event, emit) => _updateState(emit, password: event.password));
   }
 
   void _updateState(
@@ -18,7 +16,6 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState> {
     String? firstName,
     String? lastName,
     String? email,
-    String? password,
   }) {
     final currentState = state;
 
@@ -27,14 +24,12 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState> {
         firstName: firstName ?? currentState.firstName,
         lastName: lastName ?? currentState.lastName,
         email: email ?? currentState.email,
-        password: password ?? currentState.password,
       ));
     } else {
       emit(RegistrationValid(
         firstName: firstName ?? '',
         lastName: lastName ?? '',
         email: email ?? '',
-        password: password ?? '',
       ));
     }
   }

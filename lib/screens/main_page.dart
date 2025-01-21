@@ -21,7 +21,6 @@ class Test extends StatelessWidget {
                 Text('First Name: ${state.firstName}'),
                 Text('Last Name: ${state.lastName}'),
                 Text('Email: ${state.email}'),
-                Text('Password: ${state.password}'),
               ],
             ),
           );
