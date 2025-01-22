@@ -11,7 +11,7 @@ class Test extends StatelessWidget {
     return BlocBuilder<RegistrationBloc, RegistrationState>(
       builder: (context, state) {
         if (state is RegistrationInitial) {
-          return Center(child: Text('Initial State'));
+          return const Center(child: Text('Initial State'));
         } else if (state is RegistrationValid) {
           return Padding(
             padding: const EdgeInsets.all(16.0),
@@ -25,7 +25,7 @@ class Test extends StatelessWidget {
             ),
           );
         }
-        return Center(child: Text('Unknown State'));
+        return const Center(child: Text('Unknown State'));
       },
     );
   }

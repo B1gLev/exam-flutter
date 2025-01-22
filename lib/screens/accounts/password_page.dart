@@ -12,6 +12,12 @@ import 'package:test_app/widgets/app_bar.dart';
 import 'package:test_app/widgets/background_decoration.dart';
 import 'package:http/http.dart' as http;
 
+enum CreateUserResult {
+  success,
+  userAlreadyExists,
+  apiError
+}
+
 class PasswordPage extends StatelessWidget {
   const PasswordPage({super.key});
 
@@ -32,6 +38,7 @@ class PasswordPageState extends State<PasswordPageContent>  {
   final TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isButtonVisible = false;
+  String? _errorMessage;
 
   void _checkFields() {
     setState(() {
@@ -39,27 +46,41 @@ class PasswordPageState extends State<PasswordPageContent>  {
     });
   }
 
-  Future<String> createUser(String firstName, String lastName, String email, String password) async {
-    var url = Uri.http('localhost:3000', 'auth/register');
-    var response = await http.post(
-        url,
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: jsonEncode({
-          "firstName": firstName,
-          "lastName": lastName,
-          "email": email,
-          "password": password,
-        })
-    );
+  void _setErrorVisible(String? value) {
+    setState(() {
+      _errorMessage = value;
+    });
+  }
 
-    if (response.statusCode == 409) return "Error";
-    final json = jsonDecode(response.body);
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString("accessToken", json["accessToken"]);
-    prefs.setString("refreshToken", json["refreshToken"]);
-    return "Success";
+  Future<CreateUserResult> createUser(String firstName, String lastName, String email, String password) async {
+    var url = Uri.http('localhost:3000', 'auth/register');
+    try {
+      var response = await http.post(
+          url,
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: jsonEncode({
+            "firstName": firstName,
+            "lastName": lastName,
+            "email": email,
+            "password": password,
+          })
+      );
+      if (response.statusCode == 409) {
+        _setErrorVisible(AccountStrings.userExists);
+        return CreateUserResult.userAlreadyExists;
+      }
+      final json = jsonDecode(response.body);
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString("accessToken", json["accessToken"]);
+      prefs.setString("refreshToken", json["refreshToken"]);
+    } on Exception {
+      _setErrorVisible(AccountStrings.apiErrorMessage);
+      return CreateUserResult.apiError;
+    }
+    _setErrorVisible(null);
+    return CreateUserResult.success;
   }
 
   @override
@@ -116,6 +137,15 @@ class PasswordPageState extends State<PasswordPageContent>  {
                             _checkFields();
                           },
                         ),
+                        const SizedBox(height: 5),
+                        if (_errorMessage != null)
+                          Text(
+                            _errorMessage!,
+                            style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 12
+                            ),
+                          ),
                         const SizedBox(height: 50),
                         Visibility(
                           visible: _isButtonVisible,
@@ -143,16 +173,20 @@ class PasswordPageState extends State<PasswordPageContent>  {
                                         currentState.email,
                                        passwordController.text
                                     );
-                                    if (result == "Success") {
-                                      Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => BlocProvider.value(
-                                          value: bloc,
-                                          child: const Test(),
+
+                                    if (result == CreateUserResult.userAlreadyExists ||
+                                        result == CreateUserResult.apiError) return;
+
+                                    if (context.mounted) {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => BlocProvider.value(
+                                            value: bloc,
+                                            child: const Test(),
+                                          ),
                                         ),
-                                      ),
-                                    );
+                                      );
                                     }
                                   }
                                 },

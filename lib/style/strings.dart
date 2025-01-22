@@ -8,4 +8,6 @@ class AccountStrings {
   static const String buttonNextText = "Tovább";
   static const String welcomePassword = "Állítsd be a\njelszavad";
   static const String password = "Jelszó";
+  static const String apiErrorMessage = "Hiba történt";
+  static const String userExists = "Ilyen email címmel már regisztráltak!";
 }
