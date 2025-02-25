@@ -29,3 +29,32 @@ class PasswordInputField extends StatelessWidget {
     );
   }
 }
+
+class PasswordNoEmptyInputField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final int minLength = 5;
+  final int maxLength = 20;
+  final void Function(String)? onChanged;
+
+  const PasswordNoEmptyInputField(
+      {super.key,
+        required this.label,
+        required this.controller,
+        this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return InputField(
+      label: label,
+      controller: controller,
+      validator: (value) {
+        if (value!.isEmpty) {
+          return 'Nem lehet üres ez a mező.';
+        }
+        return null;
+      },
+      onChanged: onChanged,
+    );
+  }
+}

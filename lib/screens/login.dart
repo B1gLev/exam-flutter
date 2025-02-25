@@ -1,41 +1,40 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:test_app/blocs/registration/registration_bloc.dart';
-import 'package:test_app/blocs/registration/registration_state.dart';
 import 'package:test_app/helper.dart';
 import 'package:test_app/screens/main_page.dart';
+import 'package:test_app/style/email_input_field.dart';
 import 'package:test_app/style/password_input_field.dart';
 import 'package:test_app/style/strings.dart';
 import 'package:test_app/widgets/app_bar.dart';
 import 'package:test_app/widgets/background_decoration.dart';
 
-enum CreateUserResult {
+enum LoginResult {
   success,
-  userAlreadyExists,
+  error,
   apiError
 }
 
-class PasswordPage extends StatelessWidget {
-  const PasswordPage({super.key});
+class LoginPage extends StatelessWidget {
+  const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const PasswordPageContent();
+    return const LoginPageContent();
   }
 }
 
-class PasswordPageContent extends StatefulWidget {
-  const PasswordPageContent({super.key});
+class LoginPageContent extends StatefulWidget {
+  const LoginPageContent({super.key});
 
   @override
-  State<StatefulWidget> createState() => PasswordPageState();
+  State<StatefulWidget> createState() => LoginPageState();
 }
 
-class PasswordPageState extends State<PasswordPageContent>  {
+class LoginPageState extends State<LoginPageContent> {
+  final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isButtonVisible = false;
@@ -53,8 +52,8 @@ class PasswordPageState extends State<PasswordPageContent>  {
     });
   }
 
-  Future<CreateUserResult> createUser(String firstName, String lastName, String email, String password) async {
-    var url = Uri.http(Helper.apiURL, 'auth/register');
+  Future<LoginResult> loginUser(String email, String password) async {
+    var url = Uri.http(Helper.apiURL, 'auth/login');
     try {
       var response = await http.post(
           url,
@@ -62,27 +61,26 @@ class PasswordPageState extends State<PasswordPageContent>  {
             "Content-Type": "application/json"
           },
           body: jsonEncode({
-            "firstName": firstName,
-            "lastName": lastName,
             "email": email,
             "password": password,
           })
       );
-      if (response.statusCode == 409) {
-        _setErrorVisible(ErrorStrings.userExists);
-        return CreateUserResult.userAlreadyExists;
+      if (response.statusCode == 400) {
+        _setErrorVisible(ErrorStrings.wrongCredentials);
+        return LoginResult.error;
       }
       final json = jsonDecode(response.body);
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString("accessToken", json["accessToken"]);
-      prefs.setString("refreshToken", json["refreshToken"]);
+      prefs.setString("accessToken", json["tokens"]["accessToken"]);
+      prefs.setString("refreshToken", json["tokens"]["refreshToken"]);
     } on Exception {
       _setErrorVisible(ErrorStrings.apiErrorMessage);
-      return CreateUserResult.apiError;
+      return LoginResult.apiError;
     }
     _setErrorVisible(null);
-    return CreateUserResult.success;
+    return LoginResult.success;
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -91,13 +89,12 @@ class PasswordPageState extends State<PasswordPageContent>  {
       extendBodyBehindAppBar: true,
       appBar: transparentAppBar(),
       body: Padding(
-        padding:
-        const EdgeInsets.fromLTRB(40, 1.2 * kToolbarHeight, 40, 20),
+        padding: const EdgeInsets.fromLTRB(40, 1.2 * kToolbarHeight, 40, 20),
         child: SizedBox(
           height: MediaQuery.of(context).size.height,
           child: Stack(
             children: [
-              const BackgroundDecorationThree(),
+              const BackgroundDecorationTwo(),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -107,7 +104,7 @@ class PasswordPageState extends State<PasswordPageContent>  {
                     children: [
                       const Expanded(
                         child: Text(
-                          AccountStrings.welcomePassword,
+                          LoginStrings.loginMessage,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 20,
@@ -131,14 +128,21 @@ class PasswordPageState extends State<PasswordPageContent>  {
                     child: Column(
                       children: [
                         const SizedBox(height: 20),
-                        PasswordInputField(
-                          label: AccountStrings.password,
+                        EmailInputField(
+                          label: LoginStrings.email,
+                          controller: emailController,
+                          onChanged: (value) {
+                            _checkFields();
+                          },
+                        ),
+                        const SizedBox(height: 15),
+                        PasswordNoEmptyInputField(
+                          label: LoginStrings.password,
                           controller: passwordController,
                           onChanged: (value) {
                             _checkFields();
                           },
                         ),
-                        const SizedBox(height: 5),
                         if (_errorMessage != null)
                           Text(
                             _errorMessage!,
@@ -149,7 +153,7 @@ class PasswordPageState extends State<PasswordPageContent>  {
                           ),
                         const SizedBox(height: 50),
                         Visibility(
-                          visible: _isButtonVisible,
+                            visible: _isButtonVisible,
                             child: SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
@@ -162,39 +166,26 @@ class PasswordPageState extends State<PasswordPageContent>  {
                                   ),
                                 ),
                                 onPressed: () async {
-                                  final bloc = BlocProvider.of<RegistrationBloc>(
-                                      context,
-                                      listen: false
+                                  final result = await loginUser(
+                                    emailController.text,
+                                    passwordController.text,
                                   );
-                                  final currentState = bloc.state;
-                                  if (currentState is RegistrationValid) {
-                                    final result = await createUser(
-                                        currentState.firstName,
-                                        currentState.lastName,
-                                        currentState.email,
-                                       passwordController.text
-                                    );
 
-                                    if (result == CreateUserResult.userAlreadyExists ||
-                                        result == CreateUserResult.apiError) return;
-
-                                    if (context.mounted) {
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
+                                  if (context.mounted) {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
                                           builder: (context) => const HomePage()
-                                        ),
-                                      );
-                                    }
+                                      )
+                                    );
                                   }
                                 },
                                 child: const Text(
-                                  AccountStrings.buttonNextText,
+                                  LoginStrings.buttonText,
                                   style: TextStyle(fontSize: 16),
                                 ),
                               ),
-                            )
-                        ),
+                            )),
                       ],
                     ),
                   )

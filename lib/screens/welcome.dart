@@ -3,9 +3,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:test_app/screens/accounts/username_page.dart';
+import 'package:test_app/screens/login.dart';
+import 'package:test_app/widgets/custom_animation.dart';
 
-class Home extends StatelessWidget {
-  const Home({super.key});
+class Welcome extends StatelessWidget {
+  const Welcome({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +106,9 @@ class Home extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               OutlinedButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.push(context, RouteAnimation.createRoute(const LoginPage()));
+                                },
                                 style: OutlinedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 10, horizontal: 15),
@@ -126,18 +130,7 @@ class Home extends StatelessWidget {
                                 flex: 2,
                                 child: ElevatedButton(
                                   onPressed: () {
-                                    Navigator.pushReplacement(
-                                      context,
-                                      PageRouteBuilder(
-                                        opaque: false,
-                                        pageBuilder: (context, animation,
-                                                secondaryAnimation) =>
-                                            const Scaffold(
-                                          backgroundColor: Colors.transparent,
-                                          body: UsernamePage(),
-                                        ),
-                                      ),
-                                    );
+                                    Navigator.push(context, RouteAnimation.createRoute(const UsernamePage()));
                                   },
                                   style: OutlinedButton.styleFrom(
                                       padding: const EdgeInsets.symmetric(
