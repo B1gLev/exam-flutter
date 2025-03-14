@@ -5,6 +5,8 @@ class InputField extends StatelessWidget {
   final TextEditingController controller;
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
+  final bool obscureText;
+  final Widget? suffixIcon;
 
   const InputField({
     super.key,
@@ -12,6 +14,8 @@ class InputField extends StatelessWidget {
     required this.controller,
     required this.validator,
     required this.onChanged,
+    this.obscureText = false,
+    this.suffixIcon,
   });
 
   @override
@@ -32,31 +36,33 @@ class InputField extends StatelessWidget {
           controller: controller,
           validator: validator,
           onChanged: onChanged,
+          obscureText: obscureText,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           style: const TextStyle(color: Colors.white),
-          decoration: const InputDecoration(
-            contentPadding: EdgeInsets.symmetric(horizontal: 10),
-            enabledBorder: OutlineInputBorder(
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+            enabledBorder: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(10)),
               borderSide: BorderSide(color: Color(0xFFD9D9D9)),
             ),
-            focusedBorder: OutlineInputBorder(
+            focusedBorder: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(10)),
               borderSide: BorderSide(color: Color(0xFFD9D9D9)),
             ),
-            errorBorder: OutlineInputBorder(
+            errorBorder: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(10)),
               borderSide: BorderSide(color: Color(0xFFD9D9D9)),
             ),
-            focusedErrorBorder: OutlineInputBorder(
+            focusedErrorBorder: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(10)),
               borderSide: BorderSide(color: Color(0xFFD9D9D9)),
             ),
-            errorStyle: TextStyle(
+            errorStyle: const TextStyle(
               fontSize: 12,
               height: 1.5,
               color: Colors.red,
             ),
+            suffixIcon: suffixIcon, // ÚJ: lehetőség a suffixIcon használatára
           ),
         ),
       ],

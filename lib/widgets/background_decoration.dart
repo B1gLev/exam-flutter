@@ -71,3 +71,47 @@ class BackgroundDecorationThree extends StatelessWidget {
     );
   }
 }
+
+class BackgroundDecorationFour extends StatelessWidget {
+  const BackgroundDecorationFour({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Align(
+          alignment: const AlignmentDirectional(1, -0.7),
+          child: Container(
+            height: 276,
+            width: 263,
+            decoration: const BoxDecoration(
+                shape: BoxShape.circle, color: Colors.deepPurple),
+          ),
+        ),
+        Align(
+          alignment: const AlignmentDirectional(-1, -0.7),
+          child: Container(
+            height: 276,
+            width: 263,
+            decoration: const BoxDecoration(
+                shape: BoxShape.circle, color: Colors.deepPurple),
+          ),
+        ),
+        Align(
+          alignment: const AlignmentDirectional(0, -1.3),
+          child: Container(
+            height: 265,
+            width: 324,
+            decoration: const BoxDecoration(color: Color(0xFFEC7D0F)),
+          ),
+        ),
+        BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 100.0, sigmaY: 100.0),
+          child: Container(
+            decoration: const BoxDecoration(color: Colors.transparent),
+          ),
+        ),
+      ],
+    );
+  }
+}

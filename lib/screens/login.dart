@@ -1,21 +1,16 @@
-import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:test_app/helper.dart';
+import 'package:test_app/api.dart';
 import 'package:test_app/screens/main_page.dart';
 import 'package:test_app/style/email_input_field.dart';
 import 'package:test_app/style/password_input_field.dart';
 import 'package:test_app/style/strings.dart';
 import 'package:test_app/widgets/app_bar.dart';
 import 'package:test_app/widgets/background_decoration.dart';
-
-enum LoginResult {
-  success,
-  error,
-  apiError
-}
+import 'package:test_app/widgets/error_snackbar.dart';
+import 'package:test_app/widgets/succes_snackbar.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -38,7 +33,7 @@ class LoginPageState extends State<LoginPageContent> {
   final TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isButtonVisible = false;
-  String? _errorMessage;
+  String? _errorMessage = "";
 
   void _checkFields() {
     setState(() {
@@ -46,41 +41,24 @@ class LoginPageState extends State<LoginPageContent> {
     });
   }
 
-  void _setErrorVisible(String? value) {
-    setState(() {
-      _errorMessage = value;
-    });
+  Future<Response> loginUser(String email, String password) async {
+    var response = await ApiService.postRequest('auth/login', null, {"email": email, "password": password});
+    if (!response.success) return response;
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("accessToken", response.data["tokens"]["accessToken"]);
+    prefs.setString("refreshToken", response.data["tokens"]["refreshToken"]);
+
+    return response;
   }
 
-  Future<LoginResult> loginUser(String email, String password) async {
-    var url = Uri.http(Helper.apiURL, 'auth/login');
-    try {
-      var response = await http.post(
-          url,
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: jsonEncode({
-            "email": email,
-            "password": password,
-          })
-      );
-      if (response.statusCode == 400) {
-        _setErrorVisible(ErrorStrings.wrongCredentials);
-        return LoginResult.error;
-      }
-      final json = jsonDecode(response.body);
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString("accessToken", json["tokens"]["accessToken"]);
-      prefs.setString("refreshToken", json["tokens"]["refreshToken"]);
-    } on Exception {
-      _setErrorVisible(ErrorStrings.apiErrorMessage);
-      return LoginResult.apiError;
+  Future sendForgotPassword(String email) async {
+    var response = await ApiService.postRequest('auth/password/forgot', null, {"email": email});
+    if (!response.success) {
+      ErrorSnackBar.showErrorSnackBar(context, response.error.toString());
+      return;
     }
-    _setErrorVisible(null);
-    return LoginResult.success;
+    SuccessSnackBar.showSnackBar(context, "Elküldtük a jelszó-visszaállítási kérelmedet.");
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -144,13 +122,36 @@ class LoginPageState extends State<LoginPageContent> {
                           },
                         ),
                         if (_errorMessage != null)
+                          const SizedBox(height: 5),
                           Text(
                             _errorMessage!,
                             style: const TextStyle(
                                 color: Colors.red,
-                                fontSize: 12
+                                fontSize: 14
                             ),
                           ),
+                        const Text("Elfelejtetted a jelszavadat?",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () async {
+                            if (emailController.text.isEmpty) {
+                              ErrorSnackBar.showErrorSnackBar(context, "Nem adtál meg e-mail címet.");
+                              return;
+                            }
+                            await sendForgotPassword(emailController.text);
+                          },
+                          child: const Text(
+                            "Kattints ide",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 50),
                         Visibility(
                             visible: _isButtonVisible,
@@ -170,22 +171,27 @@ class LoginPageState extends State<LoginPageContent> {
                                     emailController.text,
                                     passwordController.text,
                                   );
-
-                                  if (context.mounted) {
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => const HomePage()
-                                      )
-                                    );
+                                  if (result.code == 503) {
+                                    ErrorSnackBar.showErrorSnackBar(context, result.error.toString());
+                                    return;
                                   }
+                                  if (result.code == 400) {
+                                    setState(() {
+                                      _errorMessage = result.error;
+                                    });
+                                    return;
+                                  }
+                                  Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute(builder: (context) => const HomePage()),
+                                  );
                                 },
                                 child: const Text(
                                   LoginStrings.buttonText,
                                   style: TextStyle(fontSize: 16),
                                 ),
                               ),
-                            )),
+                            )
+                        ),
                       ],
                     ),
                   )

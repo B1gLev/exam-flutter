@@ -88,5 +88,4 @@ class NoInternetState extends State<NoInternetPageContent> {
       ),
     );
   }
-
 }
