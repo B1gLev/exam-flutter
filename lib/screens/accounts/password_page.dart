@@ -74,8 +74,8 @@ class PasswordPageState extends State<PasswordPageContent>  {
       }
       final json = jsonDecode(response.body);
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString("accessToken", json["accessToken"]);
-      prefs.setString("refreshToken", json["refreshToken"]);
+      await prefs.setString("accessToken", json["accessToken"]);
+      await prefs.setString("refreshToken", json["refreshToken"]);
     } on Exception {
       _setErrorVisible(ErrorStrings.apiErrorMessage);
       return CreateUserResult.apiError;

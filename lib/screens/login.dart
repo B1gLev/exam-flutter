@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:test_app/api.dart';
@@ -45,9 +43,8 @@ class LoginPageState extends State<LoginPageContent> {
     var response = await ApiService.postRequest('auth/login', null, {"email": email, "password": password});
     if (!response.success) return response;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString("accessToken", response.data["tokens"]["accessToken"]);
-    prefs.setString("refreshToken", response.data["tokens"]["refreshToken"]);
-
+    await prefs.setString("accessToken", response.data["tokens"]["accessToken"]);
+    await prefs.setString("refreshToken", response.data["tokens"]["refreshToken"]);
     return response;
   }
 

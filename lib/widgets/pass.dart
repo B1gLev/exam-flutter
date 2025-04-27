@@ -131,7 +131,7 @@ class TicketCard extends StatelessWidget {
                 );
               },
               child: const Text(
-                "QR kód mutatása",
+                "QR-kód mutatása",
                 style: TextStyle(fontSize: 16),
               ),
             ),

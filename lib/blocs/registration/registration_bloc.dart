@@ -18,7 +18,6 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState> {
     String? email,
   }) {
     final currentState = state;
-
     if (currentState is RegistrationValid) {
       emit(currentState.copyWith(
         firstName: firstName ?? currentState.firstName,

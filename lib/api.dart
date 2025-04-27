@@ -15,7 +15,7 @@ class Response {
 }
 
 class ApiService {
-  static const String apiURL = "localhost:3000";
+  static const String _apiURL = "localhost:3000";
 
   static Future<Response> _request(
       String method,
@@ -23,7 +23,7 @@ class ApiService {
         String? token,
         Map<String, dynamic>? body,
       }) async {
-    var url = Uri.http(apiURL, endpoint);
+    var url = Uri.http(_apiURL, endpoint);
     try {
       var headers = {
         "Content-Type": "application/json",

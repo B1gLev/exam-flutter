@@ -20,21 +20,13 @@ class NoInternetPageContent extends StatefulWidget {
 }
 
 class NoInternetState extends State<NoInternetPageContent> {
-  bool _isRefreshing = false;
-
   Future<void> _checkInternetAndNavigate() async {
     final result = await Connectivity().checkConnectivity();
     if (result != ConnectivityResult.none) Get.offAll(() => const Welcome());
   }
 
   Future<void> _handleRefresh() async {
-    setState(() {
-      _isRefreshing = true;
-    });
     await _checkInternetAndNavigate();
-    setState(() {
-      _isRefreshing = false;
-    });
   }
 
   @override
